@@ -13,6 +13,8 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import Location from "./pages/Location";
 import NotFound from "./pages/NotFound";
+import BookMechanic from "./pages/BookMechanic";
+import BookShopService from "./pages/BookShopService";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,8 @@ const App = () => (
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/location" element={<Location />} />
+                <Route path="/booking/:id" element={<BookMechanic />} />
+                <Route path="/booking/shop/:id" element={<BookShopService />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
