@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -15,8 +14,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, addDays, isBefore, startOfToday } from "date-fns";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, MapPin, Phone, Star, CheckCircle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-// Mock data for mechanics
 const mechanicsData = [
   {
     id: 1,
@@ -90,7 +89,6 @@ const mechanicsData = [
   }
 ];
 
-// Form schema for booking
 const bookingFormSchema = z.object({
   date: z.date({
     required_error: "Please select a date for your appointment",
@@ -115,10 +113,8 @@ const BookMechanic = () => {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<BookingFormValues | null>(null);
 
-  // Find the selected mechanic from our data
   const selectedMechanic = mechanicsData.find(mechanic => mechanic.id === Number(id));
 
-  // Available time slots
   const timeSlots = [
     "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", 
     "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"
@@ -258,16 +254,38 @@ const BookMechanic = () => {
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>Date</FormLabel>
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => 
-                              isBefore(date, startOfToday()) || 
-                              isBefore(addDays(startOfToday(), 30), date)
-                            }
-                            className="rounded-md border"
-                          />
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Select a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) => 
+                                  isBefore(date, startOfToday()) || 
+                                  isBefore(addDays(startOfToday(), 30), date)
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}
