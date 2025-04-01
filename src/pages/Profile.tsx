@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Car, Clock, Tool, Wrench, MapPin, Phone, Settings, LogOut } from "lucide-react";
+import { CalendarDays, Car, Clock, Wrench, MapPin, Phone, Settings, LogOut } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/components/ui/use-toast";
 
-// Mock data for bookings
 const bookingsData = [
   {
     id: 1,
@@ -45,7 +43,6 @@ const bookingsData = [
   },
 ];
 
-// Mock data for vehicles
 const vehiclesData = [
   {
     id: 1,
@@ -85,10 +82,6 @@ const Profile = () => {
     navigate("/login");
   };
 
-  if (!isLoggedIn || !user) {
-    return null;
-  }
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "confirmed":
@@ -101,6 +94,10 @@ const Profile = () => {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
+
+  if (!isLoggedIn || !user) {
+    return null;
+  }
 
   return (
     <div className="container max-w-7xl mx-auto px-4 pb-20 md:py-8">
@@ -217,7 +214,7 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent className="pb-2">
                     <div className="flex items-center text-sm">
-                      <Tool className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <Wrench className="h-4 w-4 mr-2 text-muted-foreground" />
                       <span>Last serviced: {new Date(vehicle.lastService).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                     </div>
                   </CardContent>
