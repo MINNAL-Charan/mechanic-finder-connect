@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
+import { LogIn, Wrench } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -47,15 +47,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-white">
+      <Card className="w-full max-w-md shadow-lg border-t-4 border-t-primary">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-2">
-            <LogIn className="h-10 w-10 text-primary" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Wrench className="h-8 w-8 text-primary" />
+                <span className="text-2xl font-bold text-primary">ChennaiMechanics</span>
+              </div>
+              <LogIn className="h-8 w-8 text-primary mt-2" />
+            </div>
           </div>
-          <CardTitle className="text-2xl text-center">Login to MechanicFinder</CardTitle>
+          <CardTitle className="text-2xl text-center">Login to your account</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            Enter your email and password to access ChennaiMechanics
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -68,6 +74,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
+                className="rounded-md"
               />
             </div>
             <div className="space-y-2">
@@ -78,9 +85,10 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                className="rounded-md"
               />
             </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            <Button className="w-full gradient-bg" type="submit" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Log in"}
             </Button>
           </form>
@@ -88,7 +96,7 @@ const Login = () => {
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline">
+            <Link to="/signup" className="text-primary hover:underline font-medium">
               Sign up
             </Link>
           </div>

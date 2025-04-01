@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 217 91% 60%;
+    --primary: 220 70% 50%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 0 84% 60%;
@@ -33,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -74,5 +74,25 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.01];
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary/80 to-primary;
+  }
+  
+  .card-highlight {
+    @apply border-l-4 border-accent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
