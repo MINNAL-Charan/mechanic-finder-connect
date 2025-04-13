@@ -15,6 +15,7 @@ import * as z from "zod";
 import { format, addDays, isBefore, startOfToday } from "date-fns";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, MapPin, Phone, Star, CheckCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const mechanicsData = [
   {

@@ -1,8 +1,9 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, MapPin, User, LogIn, Wrench } from "lucide-react";
+import { Home, MapPin, User, LogIn, Wrench, Info } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const location = useLocation();
@@ -29,6 +30,11 @@ const Navbar = () => {
             <span className="mt-1">Map</span>
           </Link>
           
+          <Link to="/about" className="flex flex-col items-center text-xs md:hidden" aria-label="About">
+            <Info className={`h-6 w-6 ${location.pathname === '/about' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
+            <span className="mt-1">About</span>
+          </Link>
+          
           {isLoggedIn ? (
             <Link to="/profile" className="flex flex-col items-center text-xs md:hidden" aria-label="Profile">
               <User className={`h-6 w-6 ${location.pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
@@ -47,6 +53,9 @@ const Navbar = () => {
             </Link>
             <Link to="/location">
               <Button variant={location.pathname === '/location' ? "default" : "ghost"} className="font-medium" aria-current={location.pathname === '/location' ? "page" : undefined}>Find Mechanics</Button>
+            </Link>
+            <Link to="/about">
+              <Button variant={location.pathname === '/about' ? "default" : "ghost"} className="font-medium" aria-current={location.pathname === '/about' ? "page" : undefined}>About Us</Button>
             </Link>
             {isLoggedIn ? (
               <Link to="/profile">
