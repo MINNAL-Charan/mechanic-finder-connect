@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, MapPin, User, LogIn, Wrench, Info, Tool } from "lucide-react";
+import { Home, MapPin, User, LogIn, Wrench, Info, Settings } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ const Navbar = () => {
           </Link>
           
           <Link to="/mechanic-registration" className="flex flex-col items-center text-xs md:hidden" aria-label="Register">
-            <Tool className={`h-6 w-6 ${location.pathname === '/mechanic-registration' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
+            <Settings className={`h-6 w-6 ${location.pathname === '/mechanic-registration' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
             <span className="mt-1">Register</span>
           </Link>
           

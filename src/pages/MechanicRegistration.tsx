@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Wrench, Tool, MapPin, Phone, Shield } from "lucide-react";
+import { Wrench, Settings, MapPin, Phone, Shield } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -51,10 +50,8 @@ const MechanicRegistration = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      // This would normally connect to a backend API
       console.log("Submitting mechanic registration:", values);
       
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
@@ -84,7 +81,7 @@ const MechanicRegistration = () => {
                 <Wrench className="h-8 w-8 text-primary" />
                 <span className="text-2xl font-bold text-primary">ChennaiMechanics</span>
               </div>
-              <Tool className="h-8 w-8 text-primary mt-2" />
+              <Settings className="h-8 w-8 text-primary mt-2" />
             </div>
           </div>
           <CardTitle className="text-2xl text-center">Mechanic Registration</CardTitle>
