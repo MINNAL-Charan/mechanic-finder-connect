@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import BookMechanic from "./pages/BookMechanic";
 import BookShopService from "./pages/BookShopService";
 import About from "./pages/About";
+import MechanicRegistration from "./pages/MechanicRegistration";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/location" element={<Location />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/mechanic-registration" element={<MechanicRegistration />} />
                 <Route path="/booking/:id" element={<BookMechanic />} />
                 <Route path="/booking/shop/:id" element={<BookShopService />} />
                 <Route path="*" element={<NotFound />} />

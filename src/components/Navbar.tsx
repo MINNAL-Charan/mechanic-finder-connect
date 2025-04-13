@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, MapPin, User, LogIn, Wrench, Info } from "lucide-react";
+import { Home, MapPin, User, LogIn, Wrench, Info, Tool } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,11 @@ const Navbar = () => {
             <span className="mt-1">About</span>
           </Link>
           
+          <Link to="/mechanic-registration" className="flex flex-col items-center text-xs md:hidden" aria-label="Register">
+            <Tool className={`h-6 w-6 ${location.pathname === '/mechanic-registration' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
+            <span className="mt-1">Register</span>
+          </Link>
+          
           {isLoggedIn ? (
             <Link to="/profile" className="flex flex-col items-center text-xs md:hidden" aria-label="Profile">
               <User className={`h-6 w-6 ${location.pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`} aria-hidden="true" />
@@ -56,6 +61,9 @@ const Navbar = () => {
             </Link>
             <Link to="/about">
               <Button variant={location.pathname === '/about' ? "default" : "ghost"} className="font-medium" aria-current={location.pathname === '/about' ? "page" : undefined}>About Us</Button>
+            </Link>
+            <Link to="/mechanic-registration">
+              <Button variant={location.pathname === '/mechanic-registration' ? "default" : "ghost"} className="font-medium" aria-current={location.pathname === '/mechanic-registration' ? "page" : undefined}>Register as Mechanic</Button>
             </Link>
             {isLoggedIn ? (
               <Link to="/profile">
