@@ -8,58 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, MapPin, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/components/ui/use-toast";
-
-const MapPlaceholder = () => {
-  const { toast } = useToast();
-  
-  useEffect(() => {
-    toast({
-      title: "Map Integration",
-      description: "In a production app, this would be an interactive map using Google Maps or Mapbox API.",
-    });
-  }, []);
-  
-  return (
-    <div className="relative w-full h-[400px] md:h-[600px] bg-muted flex items-center justify-center rounded-lg overflow-hidden">
-      <div className="absolute inset-0 opacity-20">
-        <svg width="100%" height="100%" fill="none">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-      
-      <div className="absolute left-1/4 top-1/3 animate-pulse">
-        <div className="relative">
-          <MapPin className="h-10 w-10 text-primary" />
-          <span className="absolute -bottom-2 -right-2 bg-accent text-accent-foreground text-xs px-1 rounded-full">2</span>
-        </div>
-      </div>
-      
-      <div className="absolute right-1/3 bottom-1/3 animate-pulse">
-        <div className="relative">
-          <MapPin className="h-10 w-10 text-primary" />
-          <span className="absolute -bottom-2 -right-2 bg-accent text-accent-foreground text-xs px-1 rounded-full">3</span>
-        </div>
-      </div>
-      
-      <div className="absolute left-1/2 top-1/2 animate-pulse">
-        <div className="relative">
-          <MapPin className="h-12 w-12 text-secondary" />
-          <span className="absolute -bottom-2 -right-2 bg-secondary text-secondary-foreground text-xs px-1 rounded-full">You</span>
-        </div>
-      </div>
-      
-      <div className="absolute z-10 text-center">
-        <p className="text-lg font-medium mb-2">Interactive Map</p>
-        <p className="text-sm text-muted-foreground max-w-xs">The actual implementation would use Google Maps or Mapbox API integrated with location services.</p>
-      </div>
-    </div>
-  );
-};
+import Map from "@/components/Map";
 
 // Mock data
 const nearbyResults = [
@@ -105,6 +54,7 @@ const Location = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState(nearbyResults);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
+  const [selectedResult, setSelectedResult] = useState<any | null>(null);
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
@@ -151,10 +101,31 @@ const Location = () => {
     setResults(filtered);
   };
 
+  const handleResultSelect = (result: any) => {
+    setSelectedResult(result);
+    // On mobile, scroll to the results list
+    if (isMobile) {
+      const resultsElement = document.getElementById('results-list');
+      if (resultsElement) {
+        resultsElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    
+    // Highlight the selected result
+    const resultCards = document.querySelectorAll('[data-result-id]');
+    resultCards.forEach(card => {
+      if (card.getAttribute('data-result-id') === result.id.toString()) {
+        card.classList.add('ring-2', 'ring-primary');
+      } else {
+        card.classList.remove('ring-2', 'ring-primary');
+      }
+    });
+  };
+
   return (
     <div className={`container max-w-7xl mx-auto px-4 pb-20 ${isMobile ? 'pt-4' : 'pt-20'}`}>
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-1/3 order-2 lg:order-1 space-y-4">
+        <div className="w-full lg:w-1/3 order-2 lg:order-1 space-y-4" id="results-list">
           <div className="sticky top-20">
             <Card>
               <CardContent className="p-4">
@@ -179,7 +150,12 @@ const Location = () => {
                   <TabsContent value="nearby" className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                     {results.length > 0 ? (
                       results.map((item) => (
-                        <Card key={item.id} className="p-3">
+                        <Card 
+                          key={item.id} 
+                          className={`p-3 hover:bg-accent/20 cursor-pointer transition-all duration-200`}
+                          data-result-id={item.id}
+                          onClick={() => handleResultSelect(item)}
+                        >
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h3 className="font-medium">{item.name}</h3>
@@ -213,7 +189,12 @@ const Location = () => {
                     {nearbyResults
                       .sort((a, b) => b.rating - a.rating)
                       .map((item) => (
-                        <Card key={item.id} className="p-3">
+                        <Card 
+                          key={item.id} 
+                          className="p-3 hover:bg-accent/20 cursor-pointer transition-all duration-200"
+                          data-result-id={item.id}
+                          onClick={() => handleResultSelect(item)}
+                        >
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h3 className="font-medium">{item.name}</h3>
@@ -256,7 +237,7 @@ const Location = () => {
               </Button>
             </Card>
           ) : (
-            <MapPlaceholder />
+            <Map results={results} onResultSelect={handleResultSelect} />
           )}
         </div>
       </div>
