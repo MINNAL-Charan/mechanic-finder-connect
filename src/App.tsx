@@ -18,7 +18,14 @@ import BookShopService from "./pages/BookShopService";
 import About from "./pages/About";
 import MechanicRegistration from "./pages/MechanicRegistration";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
