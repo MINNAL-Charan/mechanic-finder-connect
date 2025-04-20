@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Wrench, Home } from "lucide-react";
+import { Wrench, Home, MapPin } from "lucide-react";
 
 // Fix for default marker icons in Leaflet with React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -26,9 +26,11 @@ interface Result {
 interface MapProps {
   results: Result[];
   onResultSelect?: (result: Result) => void;
+  selectable?: boolean;
+  onLocationSelect?: (location: { lat: number, lng: number }) => void;
 }
 
-const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
+const Map: React.FC<MapProps> = ({ results, onResultSelect, selectable = false, onLocationSelect }) => {
   const { toast } = useToast();
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -203,6 +205,33 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       markersRef.current.push(marker);
     });
   }, [results, userPosition]);
+
+  // Add click handler for location selection if selectable
+  useEffect(() => {
+    if (!mapRef.current || !selectable) return;
+
+    const handleMapClick = (e) => {
+      if (onLocationSelect) {
+        const { lat, lng } = e.latlng;
+        onLocationSelect({ lat, lng });
+        
+        // Update marker position
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setLatLng([lat, lng]);
+        } else {
+          userMarkerRef.current = L.marker([lat, lng], {
+            icon: createMarkerIcon('user'),
+          }).addTo(mapRef.current);
+        }
+      }
+    };
+
+    mapRef.current.on('click', handleMapClick);
+
+    return () => {
+      mapRef.current?.off('click', handleMapClick);
+    };
+  }, [selectable, onLocationSelect]);
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">

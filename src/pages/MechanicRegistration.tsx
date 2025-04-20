@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import Map from "@/components/Map";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +26,10 @@ const formSchema = z.object({
   acceptTerms: z.boolean().refine(val => val === true, {
     message: "You must accept the terms and conditions",
   }),
+  location: z.object({
+    lat: z.number(),
+    lng: z.number(),
+  }).optional(),
 });
 
 const MechanicRegistration = () => {
@@ -44,6 +49,7 @@ const MechanicRegistration = () => {
       servicesOffered: "",
       mobileService: false,
       acceptTerms: false,
+      location: undefined,
     },
   });
 
@@ -255,6 +261,35 @@ const MechanicRegistration = () => {
                         {...field} 
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Workshop Location</FormLabel>
+                    <FormControl>
+                      <div className="h-[300px] rounded-lg overflow-hidden border">
+                        <Map
+                          results={[]}
+                          selectable={true}
+                          onLocationSelect={(location) => {
+                            field.onChange(location);
+                            toast({
+                              title: "Location Selected",
+                              description: "Your workshop location has been set.",
+                            });
+                          }}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Click on the map to set your workshop location
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
