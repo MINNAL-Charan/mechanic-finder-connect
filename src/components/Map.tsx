@@ -63,7 +63,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        center={defaultCenter as L.LatLngExpression}
+        center={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
@@ -83,7 +83,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           return (
             <Marker
               key={index}
-              position={[lat, lng] as L.LatLngExpression}
+              position={[lat, lng]}
               eventHandlers={{
                 click: () => {
                   if (onResultSelect) {
