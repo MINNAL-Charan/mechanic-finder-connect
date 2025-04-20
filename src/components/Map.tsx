@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -29,22 +29,11 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Set Map View component to handle center
-const SetMapView: React.FC<{center: [number, number]; zoom: number}> = ({ center, zoom }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-  
-  return null;
-};
-
-// Separate location detector component
+// Create a separate component for location detection
 const LocationDetector: React.FC = () => {
   const { toast } = useToast();
   
-  useEffect(() => {
+  React.useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -75,14 +64,14 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
+        center={defaultCenter}
+        zoom={12}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
-        {/* Use SetMapView to set center and zoom */}
-        <SetMapView center={defaultCenter} zoom={12} />
-        
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {results.map((result) => {
