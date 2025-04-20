@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -89,12 +89,11 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
-        // We need to use the center and zoom as default values only
-        // and let SetView component handle the actual view changes
-        whenCreated={(mapInstance) => {
-          mapInstance.setView(defaultCenter, 12);
-        }}
+        // Initialize with default values (these don't update dynamically)
+        zoom={12}
+        // Remove center prop as it causes issues with dynamic updates
       >
+        {/* Use SetView component to handle dynamic view changes */}
         <SetView center={mapCenter} />
         
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
