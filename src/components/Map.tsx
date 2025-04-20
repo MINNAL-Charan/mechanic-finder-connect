@@ -21,42 +21,44 @@ interface MapProps {
 }
 
 // Component to handle location changes
-function LocationMarker() {
+const LocationMarker: React.FC = () => {
   const map = useMap();
   const { toast } = useToast();
 
   React.useEffect(() => {
-    map.locate().on("locationfound", function (e) {
-      map.flyTo(e.latlng, map.getZoom());
-      const radius = e.accuracy;
-      L.circle(e.latlng, radius).addTo(map);
-    }).on("locationerror", function (e) {
-      toast({
-        title: "Location Error",
-        description: "Unable to find your location. Please check your browser settings.",
-        variant: "destructive",
+    map.locate()
+      .on("locationfound", function (e) {
+        map.flyTo(e.latlng, map.getZoom());
+        const radius = e.accuracy;
+        L.circle(e.latlng, radius).addTo(map);
+      })
+      .on("locationerror", function (e) {
+        toast({
+          title: "Location Error",
+          description: "Unable to find your location. Please check your browser settings.",
+          variant: "destructive",
+        });
       });
-    });
   }, [map, toast]);
 
   return null;
-}
+};
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
-  const defaultCenter = [13.0827, 80.2707]; // Chennai coordinates
+  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
-        center={defaultCenter as [number, number]}
+        center={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         <LocationMarker />
@@ -70,7 +72,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           return (
             <Marker
               key={index}
-              position={[lat, lng] as [number, number]}
+              position={[lat, lng]}
               eventHandlers={{
                 click: () => {
                   if (onResultSelect) {
