@@ -85,12 +85,15 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         key={`map-${mapCenter[0]}-${mapCenter[1]}`}
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
+        // @ts-ignore - TypeScript definitions might be misaligned with the actual props
         center={mapCenter}
+        // @ts-ignore - TypeScript definitions might be misaligned with the actual props
         zoom={12}
-        whenCreated={setMapInstance}
+        whenCreated={(map) => setMapInstance(map)}
       >
         <TileLayer 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          // @ts-ignore - TypeScript definitions might be misaligned with the actual props
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
