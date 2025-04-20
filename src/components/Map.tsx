@@ -21,7 +21,7 @@ interface MapProps {
 }
 
 // Component to handle location changes
-const LocationMarker: React.FC = () => {
+const LocationMarker = () => {
   const map = useMap();
   const { toast } = useToast();
 
@@ -37,26 +37,29 @@ const LocationMarker: React.FC = () => {
         variant: "destructive",
       });
     });
-  }, [map]);
+  }, [map, toast]);
 
   return null;
 };
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
+  const mapRef = useRef<L.Map>(null);
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
-      <MapContainer
-        center={defaultCenter}
-        zoom={12}
+      <MapContainer 
+        ref={mapRef}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
+        center={defaultCenter}
+        zoom={12}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        
         <LocationMarker />
         
         {results.map((result, index) => {
