@@ -30,7 +30,7 @@ interface MapProps {
 }
 
 // Separate location detector component
-const LocationDetector = () => {
+const LocationDetector: React.FC = () => {
   const { toast } = useToast();
   
   useEffect(() => {
@@ -63,15 +63,15 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        defaultCenter={defaultCenter}
+        center={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {results.map((result, index) => {
