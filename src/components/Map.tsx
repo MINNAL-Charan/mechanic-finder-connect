@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useToast } from "@/hooks/use-toast";
-import { MapPin } from "lucide-react";
+import { MapPin, Wrench, Home } from "lucide-react";
 
 // Fix for default marker icons in Leaflet with React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -48,15 +48,20 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           setUserPosition(newPosition);
           setIsLocating(false);
           
-          // Update user marker
+          // Update user marker with enhanced design
           if (mapRef.current) {
             if (userMarkerRef.current) {
               userMarkerRef.current.setLatLng(newPosition);
             } else {
               userMarkerRef.current = L.marker(newPosition, {
                 icon: L.divIcon({
-                  html: '<div class="w-4 h-4 bg-primary rounded-full border-2 border-white shadow-lg"></div>',
-                  className: 'relative',
+                  html: `
+                    <div class="relative">
+                      <div class="w-6 h-6 bg-primary rounded-full border-4 border-background shadow-lg animate-pulse"></div>
+                      <div class="absolute -inset-1 bg-primary/20 rounded-full animate-ping"></div>
+                    </div>
+                  `,
+                  className: 'custom-marker-icon',
                 })
               }).addTo(mapRef.current);
             }
@@ -141,7 +146,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
     
-    // Add markers for each result
+    // Add markers for each result with enhanced design
     const center = userPosition || defaultCenter;
     results.forEach(result => {
       // Generate random positions within 5km of user location
@@ -149,14 +154,21 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       const lat = center[0] + (Math.random() - 0.5) * radius;
       const lng = center[1] + (Math.random() - 0.5) * radius;
       
-      // Custom marker icon based on result type
+      // Enhanced marker icon based on result type
       const markerIcon = L.divIcon({
         html: `
-          <div class="relative p-2 bg-background rounded-lg shadow-lg border border-border text-primary">
-            ${result.type === 'mechanic' ? 
-              '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>' :
-              '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>'
-            }
+          <div class="relative group">
+            <div class="absolute -inset-3 bg-background/80 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"></div>
+            <div class="relative p-2 bg-background rounded-lg shadow-lg border-2 ${
+              result.type === 'mechanic' ? 'border-primary' : 'border-secondary'
+            } transform transition-transform hover:scale-110 hover:shadow-xl">
+              <div class="text-lg ${result.type === 'mechanic' ? 'text-primary' : 'text-secondary'}">
+                ${result.type === 'mechanic' 
+                  ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
+                  : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>'
+                }
+              </div>
+            </div>
           </div>
         `,
         className: 'custom-marker',
@@ -165,12 +177,22 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       const marker = L.marker([lat, lng], { icon: markerIcon })
         .addTo(mapRef.current!)
         .bindPopup(`
-          <div class="p-2">
-            <strong>${result.name}</strong><br />
-            ${result.specialization}<br />
-            Rating: ${result.rating} (${result.reviews} reviews)
+          <div class="p-3 min-w-[200px]">
+            <div class="font-semibold text-lg mb-1">${result.name}</div>
+            <div class="text-sm text-muted-foreground mb-2">${result.specialization}</div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 text-primary mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                ${result.rating}
+              </div>
+              <span class="text-sm text-muted-foreground">${result.reviews} reviews</span>
+            </div>
           </div>
-        `);
+        `, {
+          className: 'custom-popup'
+        });
       
       marker.on('click', () => {
         if (onResultSelect) {
