@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +63,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        center={{ lat: defaultCenter[0], lng: defaultCenter[1] }}
+        center={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
@@ -83,7 +83,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           return (
             <Marker
               key={index}
-              position={{ lat, lng }}
+              position={[lat, lng]}
               eventHandlers={{
                 click: () => {
                   if (onResultSelect) {
