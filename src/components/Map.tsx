@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useToast } from "@/hooks/use-toast";
@@ -32,8 +32,9 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
-  const [map, setMap] = useState<L.Map | null>(null);
-  const [mapElement, setMapElement] = useState<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   
   // Handle location detection
   useEffect(() => {
@@ -57,45 +58,48 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
 
   // Initialize map
   useEffect(() => {
-    if (!mapElement) return;
-    
-    // Clean up the previous map instance
-    if (map) {
-      map.remove();
-    }
+    if (!mapContainerRef.current) return;
     
     // Use the user's position if available, otherwise use the default
     const center = userPosition || defaultCenter;
     
-    // Create a new map instance
-    const mapInstance = L.map(mapElement).setView(center, 12);
+    // Only initialize map if it doesn't exist yet
+    if (!mapRef.current) {
+      mapRef.current = L.map(mapContainerRef.current).setView(center, 12);
+      
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(mapRef.current);
+    } else {
+      // If map exists, just update the view
+      mapRef.current.setView(center, 12);
+    }
     
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(mapInstance);
-    
-    // Save the map instance
-    setMap(mapInstance);
-    
-    // Clean up function
+    // Clean up on component unmount
     return () => {
-      if (mapInstance) {
-        mapInstance.remove();
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
       }
     };
-  }, [mapElement, userPosition]);
+  }, [mapContainerRef.current]); // Only re-run when the ref changes (component mounts)
 
-  // Add markers when map and results change
+  // Update view when user position changes
   useEffect(() => {
-    if (!map) return;
+    if (!mapRef.current || !userPosition) return;
+    mapRef.current.setView(userPosition, 12);
+  }, [userPosition]);
+
+  // Add markers when results change
+  useEffect(() => {
+    if (!mapRef.current) return;
     
     // Clear existing markers
-    map.eachLayer(layer => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
+    markersRef.current.forEach(marker => {
+      marker.remove();
     });
+    markersRef.current = [];
     
     // Add markers for each result
     const center = userPosition || defaultCenter;
@@ -106,7 +110,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       const lng = center[1] + (Math.random() - 0.5) * 0.1;
       
       const marker = L.marker([lat, lng])
-        .addTo(map)
+        .addTo(mapRef.current!)
         .bindPopup(`
           <div class="p-2">
             <strong>${result.name}</strong><br />
@@ -121,14 +125,16 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           onResultSelect(result);
         }
       });
+      
+      // Store marker reference for cleanup
+      markersRef.current.push(marker);
     });
-    
-  }, [map, results, userPosition, onResultSelect]);
+  }, [results, userPosition, onResultSelect, mapRef.current]);
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <div 
-        ref={setMapElement} 
+        ref={mapContainerRef} 
         className="absolute inset-0"
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
       />
