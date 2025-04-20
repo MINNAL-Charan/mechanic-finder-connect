@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -25,7 +25,7 @@ function LocationMarker() {
   const map = useMap();
   const { toast } = useToast();
 
-  useEffect(() => {
+  React.useEffect(() => {
     map.locate().on("locationfound", function (e) {
       map.flyTo(e.latlng, map.getZoom());
       const radius = e.accuracy;
@@ -43,15 +43,16 @@ function LocationMarker() {
 }
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
-  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
+  const defaultCenter = [13.0827, 80.2707]; // Chennai coordinates
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
-        center={defaultCenter}
+        center={defaultCenter as [number, number]}
         zoom={12}
+        scrollWheelZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -69,7 +70,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           return (
             <Marker
               key={index}
-              position={[lat, lng]}
+              position={[lat, lng] as [number, number]}
               eventHandlers={{
                 click: () => {
                   if (onResultSelect) {
