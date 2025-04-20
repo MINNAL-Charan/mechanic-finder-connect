@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -19,25 +19,28 @@ interface MapProps {
 }
 
 // Component to handle location changes
-function LocationMarker() {
-  const map = useMap();
+function LocationFinder() {
   const { toast } = useToast();
-
+  
   React.useEffect(() => {
-    map.locate()
-      .on("locationfound", function (e) {
-        map.flyTo(e.latlng, map.getZoom());
-        const radius = e.accuracy;
-        L.circle(e.latlng, radius).addTo(map);
-      })
-      .on("locationerror", function (e) {
-        toast({
-          title: "Location Error",
-          description: "Unable to find your location. Please check your browser settings.",
-          variant: "destructive",
-        });
-      });
-  }, [map, toast]);
+    // Location detection logic will be handled separately
+    // to avoid the context consumer issue
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("Location found:", position.coords);
+        },
+        (error) => {
+          toast({
+            title: "Location Error",
+            description: "Unable to find your location. Please check your browser settings.",
+            variant: "destructive",
+          });
+          console.error("Geolocation error:", error);
+        }
+      );
+    }
+  }, [toast]);
 
   return null;
 }
@@ -55,11 +58,11 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
         style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        <LocationMarker />
+        <LocationFinder />
         
         {results.map((result, index) => {
           // In a real app, each result would have lat/lng
