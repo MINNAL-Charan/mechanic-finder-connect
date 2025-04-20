@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,17 @@ interface MapProps {
   results: Result[];
   onResultSelect?: (result: Result) => void;
 }
+
+// Separate component to handle map view updates
+const SetViewOnChange = ({ center }: { center: [number, number] }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, 12);
+  }, [center, map]);
+  
+  return null;
+};
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
@@ -77,12 +88,12 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         key={`map-${mapCenter[0]}-${mapCenter[1]}`}
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
-        zoom={12}
         center={mapCenter}
+        zoom={12}
       >
         <TileLayer 
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {markers.map(({ result, position }) => (
@@ -107,26 +118,10 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           </Marker>
         ))}
         
-        <LocationUpdater mapCenter={mapCenter} />
+        <SetViewOnChange center={mapCenter} />
       </MapContainer>
     </div>
   );
-};
-
-// Separate component to handle map events
-const LocationUpdater = ({ mapCenter }: { mapCenter: [number, number] }) => {
-  const map = useMapEvents({
-    load: () => {
-      map.setView(mapCenter, 12);
-    }
-  });
-  
-  // Update map view when center changes
-  useEffect(() => {
-    map.setView(mapCenter, 12);
-  }, [map, mapCenter]);
-  
-  return null;
 };
 
 export default Map;
