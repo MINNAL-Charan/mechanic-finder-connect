@@ -13,9 +13,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Define the type for the result items
+interface Result {
+  id: number;
+  name: string;
+  type: string;
+  specialization: string;
+  distance: string;
+  rating: number;
+  reviews: number;
+}
+
 interface MapProps {
-  results: any[];
-  onResultSelect?: (result: any) => void;
+  results: Result[];
+  onResultSelect?: (result: Result) => void;
 }
 
 // Component to handle location changes
