@@ -29,7 +29,7 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Separate location detection component
+// Separate location detector component
 const LocationDetector = () => {
   const { toast } = useToast();
   
@@ -59,11 +59,11 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
-      {/* Add location detector outside the MapContainer */}
+      {/* Location detector outside MapContainer */}
       <LocationDetector />
       
       <MapContainer 
-        center={defaultCenter}
+        center={{ lat: defaultCenter[0], lng: defaultCenter[1] }}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
@@ -83,7 +83,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           return (
             <Marker
               key={index}
-              position={[lat, lng]}
+              position={{ lat, lng }}
               eventHandlers={{
                 click: () => {
                   if (onResultSelect) {
