@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -29,13 +29,11 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Component to handle location changes
+// Simple component to handle location detection
 function LocationFinder() {
   const { toast } = useToast();
   
-  React.useEffect(() => {
-    // Location detection logic will be handled separately
-    // to avoid the context consumer issue
+  useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -58,20 +56,26 @@ function LocationFinder() {
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
+  
+  // Define the map container props separately to address TypeScript issues
+  const mapContainerProps = {
+    center: defaultCenter as L.LatLngExpression,
+    zoom: 12,
+    scrollWheelZoom: true,
+    className: "h-full w-full rounded-lg",
+    style: { background: '#f8f9fa' }
+  };
+
+  // Define the tile layer props separately
+  const tileLayerProps = {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  };
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
-      <MapContainer 
-        center={defaultCenter as L.LatLngExpression}
-        zoom={12}
-        scrollWheelZoom={true}
-        className="h-full w-full rounded-lg"
-        style={{ background: '#f8f9fa' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      <MapContainer {...mapContainerProps}>
+        <TileLayer {...tileLayerProps} />
         
         <LocationFinder />
         
