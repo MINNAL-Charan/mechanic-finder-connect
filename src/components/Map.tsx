@@ -62,15 +62,15 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
-        center={defaultCenter}
+        center={defaultCenter as L.LatLngExpression}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         <LocationFinder />
@@ -84,7 +84,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           return (
             <Marker
               key={index}
-              position={[lat, lng]}
+              position={[lat, lng] as L.LatLngExpression}
               eventHandlers={{
                 click: () => {
                   if (onResultSelect) {
