@@ -55,7 +55,8 @@ const LocationDetector: React.FC = () => {
 };
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
-  const defaultCenter = [13.0827, 80.2707]; // Chennai coordinates
+  // Define the center coordinates explicitly as a [number, number] tuple
+  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
   
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
@@ -63,7 +64,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        center={defaultCenter as [number, number]}
+        center={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
