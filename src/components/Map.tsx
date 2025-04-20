@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -29,13 +29,12 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Component to set the map view dynamically
-const SetView = ({ center }: { center: [number, number] }) => {
-  const map = useMap();
-  
+// Custom map view control component
+const MapViewControl = ({ mapCenter }: { mapCenter: [number, number] }) => {
   useEffect(() => {
-    map.setView(center, 12);
-  }, [center, map]);
+    // This is just a placeholder - the actual view setting is done in the parent
+    console.log("Map center updated:", mapCenter);
+  }, [mapCenter]);
   
   return null;
 };
@@ -65,9 +64,6 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
     }
   }, [toast]);
 
-  // Use the user's position if available, otherwise use the default
-  const mapCenter = userPosition || defaultCenter;
-
   // Generate marker positions based on results
   const getMarkerPositions = (results: Result[], center: [number, number]) => {
     return results.map(result => {
@@ -82,21 +78,23 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
     });
   };
 
+  // Use the user's position if available, otherwise use the default
+  const mapCenter = userPosition || defaultCenter;
   const markers = getMarkerPositions(results, mapCenter);
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
+      {/* Key added to force re-render when mapCenter changes */}
       <MapContainer 
-        className="h-full w-full rounded-lg"
-        style={{ background: '#f8f9fa' }}
-        // Remove both center and zoom props as they cause issues with the types
-        // The initial view will be set by the SetView component
+        key={`${mapCenter[0]}-${mapCenter[1]}`}
+        center={mapCenter}
+        zoom={12}
+        style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
       >
-        {/* Use SetView component to handle dynamic view changes */}
-        <SetView center={mapCenter} />
-        
+        {/* Basic map tile layer */}
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         
+        {/* Render markers for each result */}
         {markers.map(({ result, position }) => (
           <Marker
             key={result.id}
@@ -118,6 +116,8 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
             </Popup>
           </Marker>
         ))}
+        
+        <MapViewControl mapCenter={mapCenter} />
       </MapContainer>
     </div>
   );
