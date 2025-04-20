@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,17 @@ interface MapProps {
   results: Result[];
   onResultSelect?: (result: Result) => void;
 }
+
+// Component to set the map view after it's initialized
+const SetView = ({ center }: { center: [number, number] }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, 12);
+  }, [center, map]);
+  
+  return null;
+};
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
@@ -62,9 +73,10 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
-        center={mapCenter}
-        zoom={12}
       >
+        {/* Set the view using the internal component instead of props */}
+        <SetView center={mapCenter} />
+        
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
