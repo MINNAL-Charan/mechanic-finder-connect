@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -28,16 +28,6 @@ interface MapProps {
   results: Result[];
   onResultSelect?: (result: Result) => void;
 }
-
-// Custom map view control component
-const MapViewControl = ({ mapCenter }: { mapCenter: [number, number] }) => {
-  useEffect(() => {
-    // This is just a placeholder - the actual view setting is done in the parent
-    console.log("Map center updated:", mapCenter);
-  }, [mapCenter]);
-  
-  return null;
-};
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
@@ -84,17 +74,17 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
-      {/* Key added to force re-render when mapCenter changes */}
       <MapContainer 
-        key={`${mapCenter[0]}-${mapCenter[1]}`}
-        center={mapCenter}
-        zoom={12}
+        key={`map-${mapCenter[0]}-${mapCenter[1]}`}
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
+        zoom={12}
+        center={mapCenter}
       >
-        {/* Basic map tile layer */}
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer 
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
         
-        {/* Render markers for each result */}
         {markers.map(({ result, position }) => (
           <Marker
             key={result.id}
@@ -117,10 +107,26 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           </Marker>
         ))}
         
-        <MapViewControl mapCenter={mapCenter} />
+        <LocationUpdater mapCenter={mapCenter} />
       </MapContainer>
     </div>
   );
+};
+
+// Separate component to handle map events
+const LocationUpdater = ({ mapCenter }: { mapCenter: [number, number] }) => {
+  const map = useMapEvents({
+    load: () => {
+      map.setView(mapCenter, 12);
+    }
+  });
+  
+  // Update map view when center changes
+  useEffect(() => {
+    map.setView(mapCenter, 12);
+  }, [map, mapCenter]);
+  
+  return null;
 };
 
 export default Map;
