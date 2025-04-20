@@ -29,7 +29,7 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Component to set the map view after it's initialized
+// Component to set the map view dynamically
 const SetView = ({ center }: { center: [number, number] }) => {
   const map = useMap();
   
@@ -71,16 +71,13 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
-        center={defaultCenter}
-        zoom={12}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
-        {userPosition && <SetView center={mapCenter} />}
+        <SetView center={mapCenter} />
         
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
         
         {results.map((result) => {
