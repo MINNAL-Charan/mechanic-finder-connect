@@ -55,7 +55,7 @@ const LocationDetector: React.FC = () => {
 };
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
-  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
+  const defaultCenter = [13.0827, 80.2707]; // Chennai coordinates
   
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
@@ -63,18 +63,18 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        center={defaultCenter}
+        center={defaultCenter as [number, number]}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        {results.map((result, index) => {
+        {results.map((result) => {
           // In a real app, each result would have lat/lng
           // For demo purposes, we'll use random positions around Chennai
           const lat = defaultCenter[0] + (Math.random() - 0.5) * 0.1;
