@@ -70,8 +70,8 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
         style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         {results.map((result, index) => {
@@ -83,7 +83,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           
           return (
             <Marker
-              key={index}
+              key={result.id}
               position={position}
               eventHandlers={{
                 click: () => {
