@@ -89,9 +89,8 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
-        // Initialize with default values (these don't update dynamically)
-        zoom={12}
-        // Remove center prop as it causes issues with dynamic updates
+        // Remove both center and zoom props as they cause issues with the types
+        // The initial view will be set by the SetView component
       >
         {/* Use SetView component to handle dynamic view changes */}
         <SetView center={mapCenter} />
