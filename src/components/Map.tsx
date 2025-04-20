@@ -71,20 +71,21 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
+        center={defaultCenter}
+        zoom={12}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
-        {/* Set the view using the internal component instead of props */}
-        <SetView center={mapCenter} />
+        {userPosition && <SetView center={mapCenter} />}
         
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
         
         {results.map((result) => {
           // In a real app, each result would have lat/lng
-          // For demo purposes, we'll use random positions around Chennai
+          // For demo purposes, we'll use random positions around the map center
           const lat = mapCenter[0] + (Math.random() - 0.5) * 0.1;
           const lng = mapCenter[1] + (Math.random() - 0.5) * 0.1;
           const position: [number, number] = [lat, lng];
