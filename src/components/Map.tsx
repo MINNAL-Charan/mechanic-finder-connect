@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -29,21 +29,11 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Separate component to handle map view updates
-const SetViewOnChange = ({ center }: { center: [number, number] }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, 12);
-  }, [center, map]);
-  
-  return null;
-};
-
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   
   // Handle location detection
   useEffect(() => {
@@ -64,6 +54,13 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       );
     }
   }, [toast]);
+
+  // Update map view when center changes
+  useEffect(() => {
+    if (mapInstance && userPosition) {
+      mapInstance.setView(userPosition, 12);
+    }
+  }, [mapInstance, userPosition]);
 
   // Generate marker positions based on results
   const getMarkerPositions = (results: Result[], center: [number, number]) => {
@@ -90,6 +87,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
         center={mapCenter}
         zoom={12}
+        whenCreated={setMapInstance}
       >
         <TileLayer 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -117,8 +115,6 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
             </Popup>
           </Marker>
         ))}
-        
-        <SetViewOnChange center={mapCenter} />
       </MapContainer>
     </div>
   );
