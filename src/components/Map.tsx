@@ -48,18 +48,17 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
-        className="h-full w-full rounded-lg"
-        style={{ background: '#f8f9fa' }}
         center={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
+        className="h-full w-full rounded-lg"
+        style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* Replace FC component with regular function */}
         <LocationMarker />
         
         {results.map((result, index) => {
