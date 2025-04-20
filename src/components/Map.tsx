@@ -89,10 +89,11 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
-        // In react-leaflet v4, center and zoom are handled by the initial configuration
-        // but don't accept props directly on MapContainer
-        center={defaultCenter as L.LatLngExpression}
-        zoom={12}
+        // We need to use the center and zoom as default values only
+        // and let SetView component handle the actual view changes
+        whenCreated={(mapInstance) => {
+          mapInstance.setView(defaultCenter, 12);
+        }}
       >
         <SetView center={mapCenter} />
         
