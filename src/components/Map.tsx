@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useToast } from "@/hooks/use-toast";
 
 // Fix for default marker icons in Leaflet with React
@@ -33,7 +32,8 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
-  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
+  const [map, setMap] = useState<L.Map | null>(null);
+  const [mapElement, setMapElement] = useState<HTMLDivElement | null>(null);
   
   // Handle location detection
   useEffect(() => {
@@ -55,70 +55,83 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
     }
   }, [toast]);
 
-  // Update map view when center changes
+  // Initialize map
   useEffect(() => {
-    if (mapInstance && userPosition) {
-      mapInstance.setView(userPosition, 12);
+    if (!mapElement) return;
+    
+    // Clean up the previous map instance
+    if (map) {
+      map.remove();
     }
-  }, [mapInstance, userPosition]);
+    
+    // Use the user's position if available, otherwise use the default
+    const center = userPosition || defaultCenter;
+    
+    // Create a new map instance
+    const mapInstance = L.map(mapElement).setView(center, 12);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mapInstance);
+    
+    // Save the map instance
+    setMap(mapInstance);
+    
+    // Clean up function
+    return () => {
+      if (mapInstance) {
+        mapInstance.remove();
+      }
+    };
+  }, [mapElement, userPosition]);
 
-  // Generate marker positions based on results
-  const getMarkerPositions = (results: Result[], center: [number, number]) => {
-    return results.map(result => {
+  // Add markers when map and results change
+  useEffect(() => {
+    if (!map) return;
+    
+    // Clear existing markers
+    map.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        map.removeLayer(layer);
+      }
+    });
+    
+    // Add markers for each result
+    const center = userPosition || defaultCenter;
+    results.forEach(result => {
       // In a real app, each result would have lat/lng
       // For demo purposes, we'll use random positions around the map center
       const lat = center[0] + (Math.random() - 0.5) * 0.1;
       const lng = center[1] + (Math.random() - 0.5) * 0.1;
-      return {
-        result,
-        position: [lat, lng] as [number, number]
-      };
+      
+      const marker = L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup(`
+          <div class="p-2">
+            <strong>${result.name}</strong><br />
+            ${result.specialization}<br />
+            Rating: ${result.rating} (${result.reviews} reviews)
+          </div>
+        `);
+      
+      // Add click event handler
+      marker.on('click', () => {
+        if (onResultSelect) {
+          onResultSelect(result);
+        }
+      });
     });
-  };
-
-  // Use the user's position if available, otherwise use the default
-  const mapCenter = userPosition || defaultCenter;
-  const markers = getMarkerPositions(results, mapCenter);
+    
+  }, [map, results, userPosition, onResultSelect]);
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
-      <MapContainer 
-        key={`map-${mapCenter[0]}-${mapCenter[1]}`}
+      <div 
+        ref={setMapElement} 
+        className="absolute inset-0"
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem', background: '#f8f9fa' }}
-        // @ts-ignore - TypeScript definitions might be misaligned with the actual props
-        center={mapCenter}
-        // @ts-ignore - TypeScript definitions might be misaligned with the actual props
-        zoom={12}
-        whenCreated={(map) => setMapInstance(map)}
-      >
-        <TileLayer 
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          // @ts-ignore - TypeScript definitions might be misaligned with the actual props
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        
-        {markers.map(({ result, position }) => (
-          <Marker
-            key={result.id}
-            position={position}
-            eventHandlers={{
-              click: () => {
-                if (onResultSelect) {
-                  onResultSelect(result);
-                }
-              },
-            }}
-          >
-            <Popup>
-              <div className="p-2">
-                <strong>{result.name}</strong><br />
-                {result.specialization}<br />
-                Rating: {result.rating} ({result.reviews} reviews)
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+      />
     </div>
   );
 };
