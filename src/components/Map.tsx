@@ -21,7 +21,7 @@ interface MapProps {
 }
 
 // Component to handle location changes
-const LocationMarker = () => {
+function LocationMarker() {
   const map = useMap();
   const { toast } = useToast();
 
@@ -40,16 +40,14 @@ const LocationMarker = () => {
   }, [map, toast]);
 
   return null;
-};
+}
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
-  const mapRef = useRef<L.Map>(null);
 
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
       <MapContainer 
-        ref={mapRef}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
         center={defaultCenter}
