@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -54,46 +54,8 @@ const LocationDetector = () => {
   return null;
 };
 
-// Component to render the markers
-const MapMarkers = ({ results, onResultSelect }: MapProps) => {
-  const defaultCenter = [13.0827, 80.2707]; // Chennai coordinates
-  
-  return (
-    <>
-      {results.map((result, index) => {
-        // In a real app, each result would have lat/lng
-        // For demo purposes, we'll use random positions around Chennai
-        const lat = defaultCenter[0] + (Math.random() - 0.5) * 0.1;
-        const lng = defaultCenter[1] + (Math.random() - 0.5) * 0.1;
-        
-        return (
-          <Marker
-            key={index}
-            position={[lat, lng]}
-            eventHandlers={{
-              click: () => {
-                if (onResultSelect) {
-                  onResultSelect(result);
-                }
-              },
-            }}
-          >
-            <Popup>
-              <div className="p-2">
-                <strong>{result.name}</strong><br />
-                {result.specialization}<br />
-                Rating: {result.rating} ({result.reviews} reviews)
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </>
-  );
-};
-
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
-  const defaultCenter = [13.0827, 80.2707]; // Chennai coordinates
+  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
   
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
@@ -101,18 +63,46 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        center={defaultCenter as [number, number]}
+        defaultCenter={defaultCenter}
         zoom={12}
         scrollWheelZoom={true}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        <MapMarkers results={results} onResultSelect={onResultSelect} />
+        {results.map((result, index) => {
+          // In a real app, each result would have lat/lng
+          // For demo purposes, we'll use random positions around Chennai
+          const lat = defaultCenter[0] + (Math.random() - 0.5) * 0.1;
+          const lng = defaultCenter[1] + (Math.random() - 0.5) * 0.1;
+          const position: [number, number] = [lat, lng];
+          
+          return (
+            <Marker
+              key={index}
+              position={position}
+              eventHandlers={{
+                click: () => {
+                  if (onResultSelect) {
+                    onResultSelect(result);
+                  }
+                },
+              }}
+            >
+              <Popup>
+                <div className="p-2">
+                  <strong>{result.name}</strong><br />
+                  {result.specialization}<br />
+                  Rating: {result.rating} ({result.reviews} reviews)
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
