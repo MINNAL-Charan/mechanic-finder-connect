@@ -3,9 +3,7 @@ import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Fix for default marker icons in Leaflet with React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -21,7 +19,7 @@ interface MapProps {
 }
 
 // Component to handle location changes
-const LocationMarker: React.FC = () => {
+function LocationMarker() {
   const map = useMap();
   const { toast } = useToast();
 
@@ -42,7 +40,7 @@ const LocationMarker: React.FC = () => {
   }, [map, toast]);
 
   return null;
-};
+}
 
 const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
@@ -61,6 +59,7 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
+        {/* Replace FC component with regular function */}
         <LocationMarker />
         
         {results.map((result, index) => {
