@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,17 @@ interface MapProps {
   results: Result[];
   onResultSelect?: (result: Result) => void;
 }
+
+// Create an internal component to set the map view
+const SetMapView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
+  const map = useMap();
+  
+  React.useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  
+  return null;
+};
 
 // Create a separate component for location detection
 const LocationDetector: React.FC = () => {
@@ -64,11 +75,12 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <LocationDetector />
       
       <MapContainer 
-        center={defaultCenter}
-        zoom={12}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
+        zoom={12}
       >
+        <SetMapView center={defaultCenter} zoom={12} />
+        
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
