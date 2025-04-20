@@ -77,10 +77,10 @@ const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
       <MapContainer 
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
+        center={defaultCenter}
+        zoom={12}
       >
-        {/* Use function as child pattern to avoid Context consumer issues */}
-        <SetMapView center={defaultCenter} zoom={12} />
-        
+        {/* Use SetMapView component instead of direct props to avoid context issues */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
