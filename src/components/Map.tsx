@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useToast } from "@/hooks/use-toast";
@@ -29,26 +29,18 @@ interface MapProps {
   onResultSelect?: (result: Result) => void;
 }
 
-// Create an internal component to set the map view
-const SetMapView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
-  const map = useMap();
-  
-  React.useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-  
-  return null;
-};
-
-// Create a separate component for location detection
-const LocationDetector = () => {
+const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
   const { toast } = useToast();
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
+  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
   
-  React.useEffect(() => {
+  // Handle location detection
+  useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           console.log("Location found:", position.coords);
+          setUserPosition([position.coords.latitude, position.coords.longitude]);
         },
         (error) => {
           toast({
@@ -62,34 +54,27 @@ const LocationDetector = () => {
     }
   }, [toast]);
 
-  return null;
-};
+  // Use the user's position if available, otherwise use the default
+  const mapCenter = userPosition || defaultCenter;
 
-const Map: React.FC<MapProps> = ({ results, onResultSelect }) => {
-  // Define the center coordinates explicitly as a [number, number] tuple
-  const defaultCenter: [number, number] = [13.0827, 80.2707]; // Chennai coordinates
-  
   return (
     <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden">
-      {/* Location detector outside MapContainer */}
-      <LocationDetector />
-      
       <MapContainer 
-        center={defaultCenter}
-        zoom={12}
         className="h-full w-full rounded-lg"
         style={{ background: '#f8f9fa' }}
+        center={mapCenter}
+        zoom={12}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
         {results.map((result) => {
           // In a real app, each result would have lat/lng
           // For demo purposes, we'll use random positions around Chennai
-          const lat = defaultCenter[0] + (Math.random() - 0.5) * 0.1;
-          const lng = defaultCenter[1] + (Math.random() - 0.5) * 0.1;
+          const lat = mapCenter[0] + (Math.random() - 0.5) * 0.1;
+          const lng = mapCenter[1] + (Math.random() - 0.5) * 0.1;
           const position: [number, number] = [lat, lng];
           
           return (
