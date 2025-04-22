@@ -5,6 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import Home from "@/pages/Home";
+import Profile from "@/pages/Profile";
+import LocationPage from "@/pages/Location";
+import About from "@/pages/About";
+import MechanicRegistration from "@/pages/MechanicRegistration";
+import BookMechanic from "@/pages/BookMechanic";
+import BookShopService from "@/pages/BookShopService";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,7 +76,7 @@ const App = () => (
                   path="/location"
                   element={
                     <ProtectedRoute>
-                      <Location />
+                      <LocationPage />
                     </ProtectedRoute>
                   }
                 />
