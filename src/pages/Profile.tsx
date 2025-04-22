@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,75 +7,48 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Car, Clock, Wrench, MapPin, Phone, Settings, LogOut } from "lucide-react";
+import { Calendar, Car, Wrench, MapPin, Phone, Settings, LogOut, Star, Trash, Book, Review } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/components/ui/use-toast";
-
-const bookingsData = [
-  {
-    id: 1,
-    mechanicName: "John Smith",
-    service: "Oil Change",
-    status: "Confirmed",
-    date: "2023-11-15",
-    time: "10:00 AM",
-    location: "Chennai Central",
-    phone: "555-123-4567",
-  },
-  {
-    id: 2,
-    mechanicName: "Sarah Johnson",
-    service: "Brake Inspection",
-    status: "Completed",
-    date: "2023-11-10",
-    time: "02:30 PM",
-    location: "T. Nagar",
-    phone: "555-987-6543",
-  },
-  {
-    id: 3,
-    mechanicName: "Express Mechanic",
-    service: "Tire Replacement",
-    status: "Cancelled",
-    date: "2023-11-05",
-    time: "09:15 AM",
-    location: "Adyar",
-    phone: "555-333-4444",
-  },
-];
-
-const vehiclesData = [
-  {
-    id: 1,
-    model: "Honda City",
-    year: "2019",
-    licensePlate: "TN 01 AB 1234",
-    lastService: "2023-10-20",
-  },
-  {
-    id: 2,
-    model: "Maruti Swift",
-    year: "2020",
-    licensePlate: "TN 02 CD 5678",
-    lastService: "2023-09-15",
-  },
-];
+import { useVehicles } from "@/hooks/useVehicles";
+import { useBookings } from "@/hooks/useBookings";
+import { useProfile } from "@/hooks/useProfile";
 
 const Profile = () => {
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, updateProfile, reloadProfile, isLoading } = useAuth();
+  const { profile, refetch } = useProfile();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("bookings");
+  const { vehicles, addVehicle, removeVehicle } = useVehicles();
+  const { bookings, cancelBooking } = useBookings();
+  const [editMode, setEditMode] = useState(false);
+  const [profileInput, setProfileInput] = useState({
+    name: "",
+    phone: "",
+    location: "",
+  });
 
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/login");
     }
-  }, [isLoggedIn, navigate]);
+    if (profile) {
+      setProfileInput({
+        name: profile.name || "",
+        phone: profile.phone || "",
+        location: profile.location || "",
+      });
+    }
+  }, [isLoggedIn, navigate, profile]);
 
-  const handleLogout = () => {
-    logout();
+  if (!isLoggedIn || !user) {
+    return null;
+  }
+
+  const handleLogout = async () => {
+    await logout();
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
@@ -82,8 +56,39 @@ const Profile = () => {
     navigate("/login");
   };
 
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await updateProfile(profileInput);
+    setEditMode(false);
+    await refetch();
+  };
+
+  const handleAddVehicle = async () => {
+    const model = prompt("Vehicle model?");
+    const year = prompt("Year?");
+    const license_plate = prompt("License Plate?");
+    if (model && year && license_plate) {
+      await addVehicle.mutateAsync({ model, year, license_plate });
+      toast({ title: "Vehicle added" });
+    }
+  };
+
+  const handleRemoveVehicle = async (vehicleId: string) => {
+    if (window.confirm("Are you sure you want to remove this vehicle?")) {
+      await removeVehicle.mutateAsync(vehicleId);
+      toast({ title: "Vehicle removed" });
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (window.confirm("Are you sure you want to cancel this booking?")) {
+      await cancelBooking.mutateAsync(bookingId);
+      toast({ title: "Booking cancelled" });
+    }
+  };
+
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch ((status || "").toLowerCase()) {
       case "confirmed":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "completed":
@@ -94,10 +99,6 @@ const Profile = () => {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
-
-  if (!isLoggedIn || !user) {
-    return null;
-  }
 
   return (
     <div className="container max-w-7xl mx-auto px-4 pb-20 md:py-8">
@@ -112,12 +113,13 @@ const Profile = () => {
               <h1 className="text-2xl md:text-3xl font-bold">{user.name}</h1>
               <p className="text-white/80">{user.email}</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
-                <Badge className="bg-white/20 hover:bg-white/30 text-white border-none">Chennai</Badge>
+                <Badge className="bg-white/20 hover:bg-white/30 text-white border-none">{user.location || "Chennai"}</Badge>
                 <Badge className="bg-white/20 hover:bg-white/30 text-white border-none">Premium Member</Badge>
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => setEditMode((v) => !v)}>
                 <Settings className="mr-2 h-4 w-4" /> Edit Profile
               </Button>
               <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleLogout}>
@@ -125,6 +127,32 @@ const Profile = () => {
               </Button>
             </div>
           </div>
+          {editMode && (
+            <form onSubmit={handleProfileUpdate} className="mt-6 bg-white/10 rounded p-4 flex gap-2 flex-wrap items-end">
+              <input
+                type="text"
+                placeholder="Name"
+                value={profileInput.name}
+                className="rounded p-2 bg-white/20 text-white"
+                onChange={e => setProfileInput(v => ({ ...v, name: e.target.value }))}
+              />
+              <input
+                type="text"
+                placeholder="Phone"
+                value={profileInput.phone}
+                className="rounded p-2 bg-white/20 text-white"
+                onChange={e => setProfileInput(v => ({ ...v, phone: e.target.value }))}
+              />
+              <input
+                type="text"
+                placeholder="Location"
+                value={profileInput.location}
+                className="rounded p-2 bg-white/20 text-white"
+                onChange={e => setProfileInput(v => ({ ...v, location: e.target.value }))}
+              />
+              <Button type="submit" size="sm" disabled={isLoading}>Save</Button>
+            </form>
+          )}
         </div>
         
         <Tabs defaultValue="bookings" value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -134,8 +162,8 @@ const Profile = () => {
           </TabsList>
           
           <TabsContent value="bookings" className="space-y-4">
-            {bookingsData.length > 0 ? (
-              bookingsData.map((booking) => (
+            {bookings && bookings.length > 0 ? (
+              bookings.map((booking: any) => (
                 <Card key={booking.id} className="overflow-hidden card-hover">
                   <div className="flex flex-col">
                     <CardHeader className="pb-2">
@@ -143,7 +171,7 @@ const Profile = () => {
                         <div>
                           <CardTitle className="flex items-center">
                             <Wrench className="h-5 w-5 mr-2 text-primary" />
-                            {booking.mechanicName}
+                            {booking.mechanic_name}
                           </CardTitle>
                           <CardDescription>{booking.service}</CardDescription>
                         </div>
@@ -155,11 +183,11 @@ const Profile = () => {
                     <CardContent className="pb-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="flex items-center text-sm">
-                          <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{new Date(booking.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span>{booking.date && new Date(booking.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                         </div>
                         <div className="flex items-center text-sm">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <Wrench className="h-4 w-4 mr-2 text-muted-foreground" />
                           <span>{booking.time}</span>
                         </div>
                         <div className="flex items-center text-sm">
@@ -175,7 +203,7 @@ const Profile = () => {
                     <CardFooter className="flex justify-between pt-2">
                       <Button variant="outline" size="sm">View Details</Button>
                       {booking.status === "Confirmed" && (
-                        <Button variant="destructive" size="sm">Cancel Booking</Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleCancelBooking(booking.id)}>Cancel Booking</Button>
                       )}
                       {booking.status === "Completed" && (
                         <Button variant="secondary" size="sm">Leave Review</Button>
@@ -187,7 +215,7 @@ const Profile = () => {
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Clock className="h-12 w-12 text-muted-foreground mb-4" />
+                  <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-xl font-medium mb-2">No bookings yet</p>
                   <p className="text-muted-foreground mb-6">You haven't made any service bookings yet.</p>
                   <Button onClick={() => navigate("/")}>Find Mechanics</Button>
@@ -197,7 +225,7 @@ const Profile = () => {
           </TabsContent>
           
           <TabsContent value="vehicles" className="space-y-4">
-            {vehiclesData.map((vehicle) => (
+            {vehicles.map((vehicle: any) => (
               <Card key={vehicle.id} className="overflow-hidden card-hover card-highlight">
                 <div className="flex flex-col">
                   <CardHeader className="pb-2">
@@ -209,24 +237,26 @@ const Profile = () => {
                         </CardTitle>
                         <CardDescription>Year: {vehicle.year}</CardDescription>
                       </div>
-                      <Badge variant="secondary">{vehicle.licensePlate}</Badge>
+                      <Badge variant="secondary">{vehicle.license_plate}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="pb-2">
                     <div className="flex items-center text-sm">
                       <Wrench className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span>Last serviced: {new Date(vehicle.lastService).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                      <span>Last serviced: {vehicle.last_service ? new Date(vehicle.last_service).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : "N/A"}</span>
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between pt-2">
                     <Button variant="outline" size="sm">View Service History</Button>
-                    <Button size="sm">Schedule Service</Button>
+                    <Button size="sm" onClick={() => handleRemoveVehicle(vehicle.id)} variant="destructive">
+                      <Trash className="mr-2 h-4 w-4" /> Remove
+                    </Button>
                   </CardFooter>
                 </div>
               </Card>
             ))}
             <div className="mt-4">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={handleAddVehicle}>
                 <Car className="mr-2 h-4 w-4" /> Add Vehicle
               </Button>
             </div>

@@ -1,6 +1,7 @@
 
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface User {
   id: string;
@@ -15,9 +16,10 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  updateProfile: (data: Partial<User>) => void;
+  logout: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<void>;
   isLoading: boolean;
+  reloadProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,97 +29,147 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    
-    if (storedUser && storedIsLoggedIn) {
-      try {
-        setUser(JSON.parse(storedUser));
-        setIsLoggedIn(true);
-      } catch (error) {
-        console.error("Failed to parse user data from localStorage:", error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('isLoggedIn');
-      }
+  // Fetch profile from Supabase
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+    if (data) {
+      setUser({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone || "",
+        location: data.location || "",
+      });
+      setIsLoggedIn(true);
+      localStorage.setItem('user', JSON.stringify(data));
+      localStorage.setItem('isLoggedIn', 'true');
+    } else {
+      setUser(null);
+      setIsLoggedIn(false);
+      localStorage.removeItem('user');
+      localStorage.removeItem('isLoggedIn');
+    }
+    if (error) {
+      console.error("Error loading profile:", error);
     }
     setIsLoading(false);
+  };
+
+  // On mount, restore user session and profile from Supabase auth
+  useEffect(() => {
+    const restoreSession = async () => {
+      setIsLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+        setIsLoggedIn(false);
+        setIsLoading(false);
+      }
+    };
+    restoreSession();
   }, []);
+
+  // For use in Profile page to reload up-to-date info
+  const reloadProfile = async () => {
+    setIsLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await fetchProfile(session.user.id);
+    } else {
+      setUser(null);
+      setIsLoggedIn(false);
+    }
+    setIsLoading(false);
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    try {
-      // In a real app with Supabase integration, we would call the Supabase auth API here
-      // This is a mock login for demonstration purposes
-      const mockUser = {
-        id: '123',
-        name: email.split('@')[0],
-        email: email,
-        phone: '555-123-4567',
-        location: 'Chennai'
-      };
-      
-      setUser(mockUser);
-      setIsLoggedIn(true);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('isLoggedIn', 'true');
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw new Error("Login failed. Please try again.");
-    } finally {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error || !data.session?.user) {
       setIsLoading(false);
+      throw new Error(error?.message || "Login failed. Please try again.");
     }
+    await fetchProfile(data.session.user.id);
+    setIsLoading(false);
   };
 
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
-    try {
-      // In a real app with Supabase integration, we would call the Supabase auth API here
-      // This is a mock signup for demonstration purposes
-      const mockUser = {
-        id: '123',
-        name: name,
-        email: email,
-        phone: '',
-        location: 'Chennai'
-      };
-      
-      setUser(mockUser);
-      setIsLoggedIn(true);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('isLoggedIn', 'true');
-    } catch (error) {
-      console.error("Signup failed:", error);
-      throw new Error("Signup failed. Please try again.");
-    } finally {
+    // Sign up via Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }
+    });
+    if (error) {
       setIsLoading(false);
+      throw new Error(error.message || "Signup failed. Please try again.");
     }
+    // Profile will be auto-created by the trigger, so fetch it
+    if (data.user) {
+      await fetchProfile(data.user.id);
+    }
+    setIsLoading(false);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    setIsLoading(true);
+    await supabase.auth.signOut();
     setUser(null);
     setIsLoggedIn(false);
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
+    setIsLoading(false);
     toast({
       title: "Logged out successfully",
     });
   };
 
-  const updateProfile = (data: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...data };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+  const updateProfile = async (data: Partial<User>) => {
+    if (!user) return;
+    setIsLoading(true);
+    const updates = { ...data, updated_at: new Date().toISOString() };
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id);
+    if (error) {
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully",
+        title: "Update failed",
+        description: error.message,
+        variant: "destructive",
       });
+      setIsLoading(false);
+      return;
     }
+    await reloadProfile();
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been updated successfully",
+    });
+    setIsLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, signup, logout, updateProfile, isLoading }}>
+    <AuthContext.Provider value={{
+      user,
+      isLoggedIn,
+      login,
+      signup,
+      logout,
+      updateProfile,
+      isLoading,
+      reloadProfile
+    }}>
       {children}
     </AuthContext.Provider>
   );

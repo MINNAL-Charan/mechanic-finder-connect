@@ -9,7 +9,146 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          location: string
+          mechanic_name: string
+          phone: string
+          service: string
+          status: string
+          time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          location: string
+          mechanic_name: string
+          phone: string
+          service: string
+          status?: string
+          time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string
+          mechanic_name?: string
+          phone?: string
+          service?: string
+          status?: string
+          time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          location: string | null
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          location?: string | null
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          location?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          created_at: string
+          id: string
+          last_service: string | null
+          license_plate: string
+          model: string
+          updated_at: string
+          user_id: string
+          year: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_service?: string | null
+          license_plate: string
+          model: string
+          updated_at?: string
+          user_id: string
+          year: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_service?: string | null
+          license_plate?: string
+          model?: string
+          updated_at?: string
+          user_id?: string
+          year?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
