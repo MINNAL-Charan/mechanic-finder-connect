@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +16,7 @@ import { format, addDays, isBefore, startOfToday } from "date-fns";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, MapPin, Phone, Star, CheckCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useBookings } from "@/hooks/useBookings";
 
 const mechanicsData = [
   {
@@ -113,6 +114,7 @@ const BookMechanic = () => {
   const { toast } = useToast();
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<BookingFormValues | null>(null);
+  const { createBooking } = useBookings();
 
   const selectedMechanic = mechanicsData.find(mechanic => mechanic.id === Number(id));
 
@@ -145,14 +147,36 @@ const BookMechanic = () => {
     );
   }
 
-  const onSubmit = (data: BookingFormValues) => {
+  const onSubmit = async (data: BookingFormValues) => {
     console.log("Booking submitted:", data);
-    setBookingDetails(data);
-    setSuccessDialogOpen(true);
-    toast({
-      title: "Booking request sent!",
-      description: "Your booking request has been sent to the mechanic.",
-    });
+    
+    try {
+      const bookingData = {
+        mechanic_name: selectedMechanic.name,
+        date: format(data.date, "yyyy-MM-dd"),
+        time: data.time,
+        service: data.service,
+        location: selectedMechanic.distance + " miles away",
+        phone: data.contactNumber,
+        status: "Confirmed"
+      };
+      
+      await createBooking.mutateAsync(bookingData);
+      
+      setBookingDetails(data);
+      setSuccessDialogOpen(true);
+      toast({
+        title: "Booking request sent!",
+        description: "Your booking request has been sent to the mechanic.",
+      });
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast({
+        title: "Booking failed",
+        description: "There was an error creating your booking. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleBackToHome = () => {
@@ -403,6 +427,7 @@ const BookMechanic = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-center text-xl">Booking Successful!</DialogTitle>
+            <DialogDescription className="text-center">Your booking has been confirmed.</DialogDescription>
           </DialogHeader>
           <div className="py-4 text-center">
             <div className="bg-green-100 text-green-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">

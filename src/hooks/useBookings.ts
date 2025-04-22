@@ -17,21 +17,56 @@ export function useBookings() {
         .select("*")
         .eq("user_id", user.id)
         .order("date", { ascending: false });
-      if (error) throw error;
-      return data;
+      
+      if (error) {
+        console.error("Error fetching bookings:", error);
+        throw error;
+      }
+      console.log("Fetched bookings:", data);
+      return data || [];
     },
     enabled: !!user,
+  });
+
+  // Create a new booking
+  const createBooking = useMutation({
+    mutationFn: async (booking: any) => {
+      const newBooking = {
+        ...booking,
+        user_id: user?.id,
+        status: "Confirmed"
+      };
+      console.log("Creating booking:", newBooking);
+      const { data, error } = await supabase
+        .from("bookings")
+        .insert(newBooking)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating booking:", error);
+        throw error;
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings", user?.id] });
+    },
   });
 
   // Cancel booking
   const cancelBooking = useMutation({
     mutationFn: async (bookingId: string) => {
-      // Optionally update status to "Cancelled" or physically remove
+      console.log("Cancelling booking:", bookingId);
       const { error } = await supabase
         .from("bookings")
         .update({ status: "Cancelled" })
         .eq("id", bookingId);
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Error cancelling booking:", error);
+        throw error;
+      }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookings", user?.id] }),
   });
@@ -40,6 +75,7 @@ export function useBookings() {
     bookings: data || [],
     isLoading,
     error,
+    createBooking,
     cancelBooking,
   };
 }
