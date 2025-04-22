@@ -1,8 +1,6 @@
-
 import L from 'leaflet';
 import { MarkerIconType } from '@/types/map';
 
-// Fix for default marker icons in Leaflet with React
 export const initializeLeafletIcons = () => {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
   L.Icon.Default.mergeOptions({
@@ -22,8 +20,8 @@ export const createMarkerIcon = (type: MarkerIconType) => {
          </div>
        </div>`
     : type === 'shop'
-    ? `<div class="relative p-2 bg-background rounded-lg shadow-lg border-2 border-secondary transform transition-transform hover:scale-110">
-         <div class="text-lg text-secondary">
+    ? `<div class="relative p-2 bg-background rounded-lg shadow-lg border-2 border-[#000000] transform transition-transform hover:scale-110">
+         <div class="text-lg text-[#000000]">
            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
              <path d="M9 22V12h6v10"/>

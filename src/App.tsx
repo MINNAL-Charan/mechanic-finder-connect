@@ -1,22 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
-
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Profile from "./pages/Profile";
-import Location from "./pages/Location";
-import NotFound from "./pages/NotFound";
-import BookMechanic from "./pages/BookMechanic";
-import BookShopService from "./pages/BookShopService";
-import About from "./pages/About";
-import MechanicRegistration from "./pages/MechanicRegistration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +14,24 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -38,15 +44,64 @@ const App = () => (
             <Navbar />
             <main className="flex-1 pb-16 md:pt-16 md:pb-0">
               <Routes>
-                <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/location" element={<Location />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/mechanic-registration" element={<MechanicRegistration />} />
-                <Route path="/booking/:id" element={<BookMechanic />} />
-                <Route path="/booking/shop/:id" element={<BookShopService />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/location"
+                  element={
+                    <ProtectedRoute>
+                      <Location />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/about"
+                  element={
+                    <ProtectedRoute>
+                      <About />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/mechanic-registration"
+                  element={
+                    <ProtectedRoute>
+                      <MechanicRegistration />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/booking/:id"
+                  element={
+                    <ProtectedRoute>
+                      <BookMechanic />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/booking/shop/:id"
+                  element={
+                    <ProtectedRoute>
+                      <BookShopService />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
