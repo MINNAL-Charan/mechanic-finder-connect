@@ -1,3 +1,5 @@
+
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +18,7 @@ import BookMechanic from "@/pages/BookMechanic";
 import BookShopService from "@/pages/BookShopService";
 import NotFound from "@/pages/NotFound";
 
+// Create a new QueryClient instance outside of the component
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -44,82 +47,84 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1 pb-16 md:pt-16 md:pb-0">
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Home />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/location"
-                  element={
-                    <ProtectedRoute>
-                      <LocationPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/about"
-                  element={
-                    <ProtectedRoute>
-                      <About />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/mechanic-registration"
-                  element={
-                    <ProtectedRoute>
-                      <MechanicRegistration />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/booking/:id"
-                  element={
-                    <ProtectedRoute>
-                      <BookMechanic />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/booking/shop/:id"
-                  element={
-                    <ProtectedRoute>
-                      <BookShopService />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1 pb-16 md:pt-16 md:pb-0">
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/location"
+                    element={
+                      <ProtectedRoute>
+                        <LocationPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/about"
+                    element={
+                      <ProtectedRoute>
+                        <About />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/mechanic-registration"
+                    element={
+                      <ProtectedRoute>
+                        <MechanicRegistration />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/booking/:id"
+                    element={
+                      <ProtectedRoute>
+                        <BookMechanic />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/booking/shop/:id"
+                    element={
+                      <ProtectedRoute>
+                        <BookShopService />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
 );
 
 export default App;
