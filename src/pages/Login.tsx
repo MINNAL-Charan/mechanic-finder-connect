@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Wrench, Mail } from "lucide-react";
+import { LogIn, Wrench, Mail, AlertCircle } from "lucide-react";
 
 const ForgotPasswordModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const [email, setEmail] = useState("");
@@ -73,9 +73,42 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [verificationNeeded, setVerificationNeeded] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const resendVerificationEmail = async () => {
+    try {
+      setIsLoading(true);
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Verification email sent",
+          description: "Please check your inbox (and spam folder)",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send verification email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,12 +129,22 @@ const Login = () => {
         description: "You have successfully logged in",
       });
       navigate("/");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      // Check for email not confirmed error
+      if (error.message?.includes("email_not_confirmed") || error.message?.includes("Email not confirmed")) {
+        setVerificationNeeded(true);
+        toast({
+          title: "Email not verified",
+          description: "Please verify your email before logging in",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -127,6 +170,23 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {verificationNeeded && (
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4 flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium text-amber-800">Email verification required</p>
+                <p className="text-amber-700 mt-1">Please check your inbox and verify your email before logging in.</p>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-amber-800 mt-1" 
+                  onClick={resendVerificationEmail}
+                  disabled={isLoading}
+                >
+                  Resend verification email
+                </Button>
+              </div>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
@@ -179,4 +239,3 @@ const Login = () => {
 };
 
 export default Login;
-

@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Wrench } from "lucide-react";
+import { User, Wrench, CheckCircle } from "lucide-react";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -14,6 +14,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const { signup } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -41,21 +42,49 @@ const Signup = () => {
     setIsLoading(true);
     try {
       await signup(name, email, password);
+      setSignupSuccess(true);
       toast({
         title: "Success",
-        description: "Your account has been created",
+        description: "Your account has been created. Please verify your email to continue.",
       });
-      navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create account",
+        description: error.message || "Failed to create account",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (signupSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-white">
+        <Card className="w-full max-w-md shadow-lg border-t-4 border-t-green-500">
+          <CardHeader className="space-y-1">
+            <div className="flex justify-center mb-2">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <CardTitle className="text-2xl text-center">Email Verification Required</CardTitle>
+            <CardDescription className="text-center">
+              We've sent a verification email to <span className="font-medium">{email}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-muted-foreground mb-6">
+              Please check your inbox (and spam folder) and click the verification link to activate your account.
+            </p>
+            <div className="space-y-4">
+              <Button className="w-full" onClick={() => navigate("/login")}>
+                Go to Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-white">
