@@ -2,6 +2,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Database } from "@/integrations/supabase/types";
+
+// Define booking type based on Supabase database types
+type Booking = Database['public']['Tables']['bookings']['Row'];
+type BookingInsert = Database['public']['Tables']['bookings']['Insert'];
 
 // Fetch user bookings
 export function useBookings() {
@@ -30,10 +35,10 @@ export function useBookings() {
 
   // Create a new booking
   const createBooking = useMutation({
-    mutationFn: async (booking: any) => {
-      const newBooking = {
+    mutationFn: async (booking: Omit<BookingInsert, 'user_id' | 'status'>) => {
+      const newBooking: BookingInsert = {
         ...booking,
-        user_id: user?.id,
+        user_id: user?.id || '',
         status: "Confirmed"
       };
       console.log("Creating booking:", newBooking);
@@ -72,7 +77,7 @@ export function useBookings() {
   });
 
   return {
-    bookings: data || [],
+    bookings: data as Booking[],
     isLoading,
     error,
     createBooking,
